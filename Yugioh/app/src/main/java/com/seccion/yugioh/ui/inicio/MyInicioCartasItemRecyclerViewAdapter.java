@@ -21,7 +21,7 @@ import java.util.List;
 
 public class MyInicioCartasItemRecyclerViewAdapter extends RecyclerView.Adapter<MyInicioCartasItemRecyclerViewAdapter.ViewHolder> {
 
-    //Creamos una variable de tipo Context
+    //Creamos una variable de tipo Context para poder hacer uso de Context dentro de esta clase
     private Context ctx;
     //A nuestra variable mValues que era de tipo List de la clase Dummy le pasamos una lista de nuestra clase ResponseCartas
     private List<ResponseCartas> mValues;
