@@ -1,7 +1,9 @@
 package com.seccion.yugioh.ui.cuadros_dialogo;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seccion.yugioh.Common.MyApp;
+import com.seccion.yugioh.Common.SharedPreferencesManager;
 import com.seccion.yugioh.DataLocal.Dao.YugiogUserEntity;
 import com.seccion.yugioh.DataLocal.DataBases.YugiohViewModel;
 import com.seccion.yugioh.R;
@@ -59,14 +63,25 @@ public class ComprarDialogFragment extends DialogFragment {
         //builder.setMessage("");
         builder.setPositiveButton("Comprar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Double saldo_usuario = Double.valueOf(saldo_txt.getText().toString());
-                        if (saldo_usuario > precio){
+                        Double saldo_usuario = Double.valueOf(SharedPreferencesManager.getSomeStringValue("user_creditos"));
+                        if ( saldo_usuario > precio){
                             //Si el saldo del usuario es suficiente se agrega a la lista de cartas compradas
                             //Metodo para guardar la carta en la lista de compradas
                             YugiohViewModel mViewModel;
                             mViewModel = ViewModelProviders.of(getActivity()).get(YugiohViewModel.class);
                             mViewModel.insertarCartaComprada(new YugiogUserEntity(nombre_carta, descripcion_carta,
                                     tipo_carta, ataque_carta, defensa_carta, estrellas_carta, imagen_carta, precio_carta, favorito_carta));
+
+                            //Actualizar el saldo del usuario
+                            Double sobrante = saldo_usuario - precio;
+                            if (!SharedPreferencesManager.getSomeStringValue("user_login").isEmpty()) {
+                                SharedPreferences preferenceManager = getActivity().getSharedPreferences("APP_SETTINGS", Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = preferenceManager.edit();
+                                editor.remove("user_creditos");
+                                editor.putString("user_creditos", String.valueOf(sobrante));
+                                editor.commit();
+                            }
+
                             //Mostramos un mensaje de confirmacion al usuario
                             FragmentManager fragmentManager = ((AppCompatActivity)getActivity()).getSupportFragmentManager();
                             AprobadoDialogFragment aprobadoDialogFragment = new AprobadoDialogFragment();
@@ -91,8 +106,9 @@ public class ComprarDialogFragment extends DialogFragment {
         precio_txt = view.findViewById(R.id.precio_txt);
         saldo_txt = view.findViewById(R.id.saldo_txt);
         precio_txt.setText(String.valueOf(precio));
+        saldo_txt.setText(SharedPreferencesManager.getSomeStringValue("user_creditos"));
         builder.setView(view);
         return builder.create();
-
     }
+
 }

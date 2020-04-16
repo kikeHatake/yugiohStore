@@ -1,13 +1,21 @@
 package com.seccion.yugioh;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
+import com.seccion.yugioh.Common.SharedPreferencesManager;
 
+import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -16,9 +24,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import static com.seccion.yugioh.Common.MyApp.getContext;
+
 public class UsuariosMainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
+    private TextView nombre_usuario, credito_usuario;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +43,7 @@ public class UsuariosMainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                sendEmail();
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -45,6 +57,14 @@ public class UsuariosMainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        View header = navigationView.getHeaderView(0);
+        nombre_usuario = header.findViewById(R.id.nombre_usuario);
+        credito_usuario = header.findViewById(R.id.creditos_usuario);
+        nombre_usuario.setText("Usuario: "+SharedPreferencesManager.getSomeStringValue("user_login"));
+        credito_usuario.setText("Creditos: "+SharedPreferencesManager.getSomeStringValue("user_creditos"));
+
+
     }
 
     @Override
@@ -55,9 +75,42 @@ public class UsuariosMainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_settings:
+                Toast.makeText(this, "Configuraciones del perfil", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;        
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        credito_usuario.setText("Creditos: "+SharedPreferencesManager.getSomeStringValue("user_creditos"));
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    private void sendEmail() {
+        String[] TO = {"enriqueespinosaRE@outlook.com"}; //aquí pon tu correo
+        String[] CC = {""};
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setData(Uri.parse("mailto:"));
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, TO);
+        emailIntent.putExtra(Intent.EXTRA_CC, CC);
+        // Esto podrás modificarlo si quieres, el asunto y el cuerpo del mensaje
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Contacto desde aplicación web");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Escribe aquí tu mensaje");
+
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Enviar email..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(getContext(),
+                    "No tienes ninguna aplicacion para enviar correos.", Toast.LENGTH_SHORT).show();
+        }
     }
 }

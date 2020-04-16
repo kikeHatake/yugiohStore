@@ -1,16 +1,22 @@
 package com.seccion.yugioh;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seccion.yugioh.Common.SharedPreferencesManager;
 import com.seccion.yugioh.DialogsFragments.RegistroUsuario.RegistroUsuarioNuevoFragment;
 import com.seccion.yugioh.Retrofit.Response.ResponseUsuarioLogin;
 import com.seccion.yugioh.Retrofit.YugiohClient;
@@ -72,6 +78,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 String usuario_consultado = response.body().getNombreUsuario();
                                 String password_consultada = response.body().getPassword();
                                 if (usuario.equals(usuario_consultado) && password.equals(password_consultada)) {
+                                    SharedPreferencesManager.setSomeStringValue("user_login", usuario_consultado);
+                                    if (SharedPreferencesManager.getSomeStringValue("user_creditos") == null){
+                                        SharedPreferencesManager.setSomeStringValue("user_creditos", "10000");
+                                    }else {
+                                        Log.d("HIDEO", "onResponse: el usuario ya tiene creditos");
+                                    }
+
                                     Intent intent = new Intent(MainActivity.this, UsuariosMainActivity.class);
                                     startActivity(intent);
                                     finish();
