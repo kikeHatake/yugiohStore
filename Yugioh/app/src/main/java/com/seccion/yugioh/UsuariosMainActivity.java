@@ -78,7 +78,8 @@ public class UsuariosMainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_settings:
-                Toast.makeText(this, "Configuraciones del perfil", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(UsuariosMainActivity.this, SettingsActivity.class);
+                startActivity(intent);
                 break;
             default:
                 break;        
@@ -89,6 +90,7 @@ public class UsuariosMainActivity extends AppCompatActivity {
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        nombre_usuario.setText("Usuario: "+SharedPreferencesManager.getSomeStringValue("user_login"));
         credito_usuario.setText("Creditos: "+SharedPreferencesManager.getSomeStringValue("user_creditos"));
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();

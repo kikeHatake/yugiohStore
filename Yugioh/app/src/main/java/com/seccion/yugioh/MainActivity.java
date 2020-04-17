@@ -42,6 +42,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+        if(SharedPreferencesManager.getSomeStringValue("user_login") != null && SharedPreferencesManager.getSomeStringValue("user_password") != null){
+            Intent intent = new Intent(MainActivity.this, UsuariosMainActivity.class);
+            startActivity(intent);
+            finish();
+        }else {
+            Log.d("HIDEO","No hay un usuario registrado");
+        }
+
         user_text = findViewById(R.id.user_editText);
         password_text = findViewById(R.id.password_userText);
         btnLogin = findViewById(R.id.btnLogin);
@@ -75,10 +83,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void onResponse(Call<ResponseUsuarioLogin> call, Response<ResponseUsuarioLogin> response) {
                             if (response.isSuccessful()) {
+
                                 String usuario_consultado = response.body().getNombreUsuario();
                                 String password_consultada = response.body().getPassword();
+                                String idUsuario_consultado = response.body().getId();
+                                Log.d("HIDEO","EL id del usuario es: "+idUsuario_consultado);
                                 if (usuario.equals(usuario_consultado) && password.equals(password_consultada)) {
                                     SharedPreferencesManager.setSomeStringValue("user_login", usuario_consultado);
+                                    SharedPreferencesManager.setSomeStringValue("user_password", password_consultada);
+                                    SharedPreferencesManager.setSomeStringValue("user_id", idUsuario_consultado);
                                     if (SharedPreferencesManager.getSomeStringValue("user_creditos") == null){
                                         SharedPreferencesManager.setSomeStringValue("user_creditos", "10000");
                                     }else {
