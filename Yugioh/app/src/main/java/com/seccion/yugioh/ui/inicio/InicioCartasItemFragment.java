@@ -1,8 +1,10 @@
 package com.seccion.yugioh.ui.inicio;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +22,10 @@ import com.seccion.yugioh.R;
 import com.seccion.yugioh.Retrofit.Response.ResponseCartas;
 import com.seccion.yugioh.Retrofit.ViewModel.CartasViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class InicioCartasItemFragment extends Fragment {
+public class InicioCartasItemFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private int mColumnCount = 1;
     //Declaramos como variable global el recyclerView
@@ -32,6 +36,8 @@ public class InicioCartasItemFragment extends Fragment {
     private List<ResponseCartas> cartasList;
     //Creamos una instancia a nuestra clase ViewModel que nos permitira recuperar la informacion y enviarla al adapter
     private CartasViewModel cartasViewModel;
+    //Swipe
+    SwipeRefreshLayout swipe;
 
     public InicioCartasItemFragment() {
     }
@@ -45,22 +51,26 @@ public class InicioCartasItemFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_inicio_cartas_item_list, container, false);
+        swipe = view.findViewById(R.id.swipe_view);
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            adapter = new MyInicioCartasItemRecyclerViewAdapter(cartasList, getActivity());
-            recyclerView.setAdapter(adapter);
-            loadCartas();
+        Context context = view.getContext();
+        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+
+        if (mColumnCount <= 1) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        } else {
+            recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
+
+        adapter = new MyInicioCartasItemRecyclerViewAdapter(cartasList, getActivity());
+        recyclerView.setAdapter(adapter);
+        loadCartas();
+
+        swipe.setOnRefreshListener(this);
+
         return view;
     }
 
@@ -74,6 +84,20 @@ public class InicioCartasItemFragment extends Fragment {
                 cartasList = responseCartas;
                 //Una vez que rescuperamos la lista de cartas de servidor la enviamos a un metodo dentro de nuestra clase adapter
                 adapter.setData(cartasList);
+            }
+        });
+    }
+
+
+    @Override
+    public void onRefresh() {
+        swipe.setRefreshing(true);;
+        cartasViewModel.getListaNuevaCartas().observe(getActivity(), new Observer<List<ResponseCartas>>() {
+            @Override
+            public void onChanged(List<ResponseCartas> responseCartas) {
+                cartasList = responseCartas;
+                adapter.setData(cartasList);
+                swipe.setRefreshing(false);
             }
         });
     }

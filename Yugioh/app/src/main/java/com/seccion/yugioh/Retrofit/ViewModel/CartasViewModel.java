@@ -27,5 +27,10 @@ public class CartasViewModel extends AndroidViewModel {
 
     //Debemos crear un metodo de tipo LiveData para recuperar y listar la lista de cartas
     public LiveData<List<ResponseCartas>> getListaCartas(){return listaCartas;}
+    //Creamos el metodo para poder crear una nueva lista
+    public LiveData<List<ResponseCartas>> getListaNuevaCartas(){
+        listaCartas = cartasRepository.getAllCartas();
+        return listaCartas;
+    }
 
 }

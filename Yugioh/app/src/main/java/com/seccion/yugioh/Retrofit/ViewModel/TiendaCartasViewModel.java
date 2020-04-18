@@ -11,6 +11,8 @@ import com.seccion.yugioh.Retrofit.Response.ResponseTiendaCartas;
 
 import java.util.List;
 
+import okhttp3.Response;
+
 public class TiendaCartasViewModel extends AndroidViewModel {
     //Primer debemo de declarar dos variables, una variable sera del tipo de nuestra clase Repository y la otra sera una LiveData
     private TiendaCartasRepository tiendaCartasRepository;
@@ -28,4 +30,9 @@ public class TiendaCartasViewModel extends AndroidViewModel {
 
     //Creamos un metodo para recuperar la informacion, este metodo debe retornar nuestra variable llamada listaTienda
     public LiveData<List<ResponseTiendaCartas>> getListaTienda(){return listaTienda;}
+    //Creamos el metodo para actualizar haciendo un pull to refresh
+    public LiveData<List<ResponseTiendaCartas>> getListaNuevaTienda(){
+        listaTienda = tiendaCartasRepository.getAllTiendaCartas();
+        return listaTienda;
+    }
 }
